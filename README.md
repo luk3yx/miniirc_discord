@@ -23,6 +23,9 @@ a message in one of them.
 Currently only `PRIVMSG`s (and `CTCP ACTION`s) are supported, however PRs are
 welcome.
 
+You can use `AWAY` to set the bot's "Playing" or "Streaming" text. Running this
+command with an empty value will unset it.
+
 Some formatting from IRC to Discord should be translated nicely, however
 more complex codes and formatting from Discord to IRC are currently not.
 

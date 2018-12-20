@@ -46,7 +46,7 @@ def _handle_privmsg(irc, message):
 
 formats = {
     '\x1f': '__',
-    '\x1d': '_',
+    '\x1d': '*',
     '\x02': '**',
 }
 _strip_colours = re.compile('\x03[0-9]?[0-9]?')
@@ -58,10 +58,15 @@ def _irc_to_discord(msg):
     return msg
 
 class Discord(miniirc.IRC):
+    def _run(self, coroutine):
+        return asyncio.run_coroutine_threadsafe(coroutine, self._client.loop)
+
     def quote(self, *msg, force = None):
         # Parse the message using miniirc's built-in parser to reduce redundancy
-        cmd, hostmask, tags, args = miniirc.ircv3_message_parser(' '.join(msg))
+        msg = ' '.join(msg)
         self.debug('>>>', msg)
+        cmd, hostmask, tags, args = miniirc.ircv3_message_parser(msg)
+        cmd = cmd.upper()
 
         if cmd in ('PRIVMSG', 'NOTICE'):
             if len(args) == 2 and args[0] in channels:
@@ -71,12 +76,16 @@ class Discord(miniirc.IRC):
                     msg = '\x1d' + msg[8:].replace('\x01', '') + '\x1d'
                 msg = _irc_to_discord(msg)
                 self.debug('Translated PRIVMSG:', msg)
-                asyncio.run_coroutine_threadsafe(
-                    self._client.send_message(chan, msg),
-                    self._client.loop
-                )
+                self._run(self._client.send_message(chan, msg))
             else:
                 self.debug('Invalid call to PRIVMSG.')
+        elif cmd in ('AWAY'):
+            game = ' '.join(args)
+            if game.startswith(':'):
+                game = game[1:]
+            self.debug('Changing online presence:', game)
+            game = discord.Game(name = game)
+            self._run(self._client.change_presence(game = game))
 
     def _main(self):
         self.debug('Main loop running!')
@@ -104,3 +113,6 @@ class Discord(miniirc.IRC):
 
     def disconnect(self):
         raise NotImplementedError
+
+    def get_server_count(self):
+        return len(self._client.servers)

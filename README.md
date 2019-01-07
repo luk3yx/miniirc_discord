@@ -31,12 +31,20 @@ more complex codes and formatting from Discord to IRC are currently not.
 
 ## Installation and setting up
 
-To install `miniirc_discord`, you can usually place it in the same directory
-as your other `.py` files or in a package directory.
+You can install `miniirc_discord` with `pip`. On Linux-based systems, you would
+do `sudo pip3 install miniirc_discord`. pip's version numbers have the same
+`MAJOR` and `MINOR` as miniirc, however `PATCH` may vary.
+
+### Manual installation
+
+To install `miniirc_discord` manually, you can usually place it in the same
+directory as your other `.py` files or in a package directory.
 
 You will need to install the following dependencies (normally with `pip3`):
  - `discord.py`
  - `miniirc`
+
+## Getting a bot token
 
 To get a Discord bot token and invite link, see [this guide].
 

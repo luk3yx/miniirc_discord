@@ -9,6 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
+ver      = (0,3,12)
+version  = '0.3.12'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -58,6 +60,8 @@ def _irc_to_discord(msg):
     return msg
 
 class Discord(miniirc.IRC):
+    _client = None
+
     def _run(self, coroutine):
         return asyncio.run_coroutine_threadsafe(coroutine, self._client.loop)
 
@@ -79,7 +83,7 @@ class Discord(miniirc.IRC):
                 self._run(self._client.send_message(chan, msg))
             else:
                 self.debug('Invalid call to PRIVMSG.')
-        elif cmd in ('AWAY'):
+        elif cmd == 'AWAY':
             game = ' '.join(args)
             if game.startswith(':'):
                 game = game[1:]
@@ -115,4 +119,9 @@ class Discord(miniirc.IRC):
         raise NotImplementedError
 
     def get_server_count(self):
+        if not self._client:
+            return 0
         return len(self._client.servers)
+
+# Add get_server_count equivalent to IRC.
+miniirc.IRC.get_server_count = lambda irc : 1 if irc.connected else 0

@@ -86,7 +86,18 @@ class Discord(miniirc.IRC):
             self.debug('Changing online presence:', game)
             game = discord.Game(name = game)
             self._run(self._client.change_presence(game = game))
-
+        elif cmd in ('EMBED_NOTICE',):
+            if len(args) == 4:
+                EMBED_NOTICE = discord.Embed(title=args[0], description=args[1], colour=arg[2])
+                EMBED_NOTICE.set_author(name=args[3], icon_url=discord.client.user.default_avatar_url)
+            else:
+                self.debug('Invalid call to EMBED_NOTICE')
+        elif cmd in ('NAMES',):
+            discord.Member._dict_
+    
+    def embed(self, title, description, colour, name, *icon_url):
+        self.quote('EMBED_NOTICE', title, description, colour, name, icon_url)
+        
     def _main(self):
         self.debug('Main loop running!')
 

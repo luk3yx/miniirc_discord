@@ -1,5 +1,7 @@
 # miniirc_discord
 
+[![Available on PyPI.](https://img.shields.io/pypi/v/miniirc-discord.svg)](https://pypi.org/project/miniirc-discord/)
+
 A wrapper for miniirc ([GitHub], [GitLab]) to allow bots or clients made in
 miniirc to connect to (proprietary) [Discord] servers via [discord.py] with
 minimal code changes.

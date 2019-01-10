@@ -9,8 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,3,12)
-version  = '0.3.12'
+ver      = (0,3,13)
+version  = '0.3.13'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -65,7 +65,7 @@ class Discord(miniirc.IRC):
     def _run(self, coroutine):
         return asyncio.run_coroutine_threadsafe(coroutine, self._client.loop)
 
-    def quote(self, *msg, force = None):
+    def quote(self, *msg, force = None, tags = None):
         # Parse the message using miniirc's built-in parser to reduce redundancy
         msg = ' '.join(msg)
         self.debug('>>>', msg)

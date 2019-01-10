@@ -9,8 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,3,13)
-version  = '0.3.13'
+ver      = (0,4,1)
+version  = '0.4.1'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -69,8 +69,12 @@ class Discord(miniirc.IRC):
         # Parse the message using miniirc's built-in parser to reduce redundancy
         msg = ' '.join(msg)
         self.debug('>>>', msg)
-        cmd, hostmask, tags, args = miniirc.ircv3_message_parser(msg)
+        cmd, hostmask, _, args = miniirc.ircv3_message_parser(msg)
         cmd = cmd.upper()
+        del _
+
+        if type(tags) != dict:
+            tags = None
 
         if cmd in ('PRIVMSG', 'NOTICE'):
             if len(args) == 2 and args[0] in channels:
@@ -87,8 +91,19 @@ class Discord(miniirc.IRC):
             game = ' '.join(args)
             if game.startswith(':'):
                 game = game[1:]
+            ptype = (tags and tags.get('+discordapp.com/type') or '').lower()
+            url   = None
+            if ptype == 'watching':
+                ptype = 3
+            elif ptype == 'listening to':
+                ptype = 2
+            elif ptype == 'streaming':
+                ptype = 1
+                url  = 'https://www.twitch.tv/directory'
+            else:
+                ptype = 0
+            game = discord.Game(name = game, type = ptype, url = url)
             self.debug('Changing online presence:', game)
-            game = discord.Game(name = game)
             self._run(self._client.change_presence(game = game))
 
     def _main(self):

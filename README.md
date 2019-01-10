@@ -23,8 +23,14 @@ a message in one of them.
 Currently only `PRIVMSG`s (and `CTCP ACTION`s) are supported, however PRs are
 welcome.
 
-You can use `AWAY` to set the bot's "Playing" or "Streaming" text. Running this
+You can use `AWAY` to set the bot's "Playing" text. Running this
 command with an empty value will unset it.
+
+When you run `AWAY`, you can use the IRCv3 client tag `+discordapp.com/type`
+and set it to one of the allowed case-insensitive prefixes (`Playing`,
+`Streaming`, `Listening to` or `Watching`). Note that setting it to `Streaming`
+will set the stream URL to a dummy page.
+
 
 Some formatting from IRC to Discord should be translated nicely, however
 more complex codes and formatting from Discord to IRC are currently not.
@@ -32,8 +38,9 @@ more complex codes and formatting from Discord to IRC are currently not.
 ## Installation and setting up
 
 You can install `miniirc_discord` with `pip`. On Linux-based systems, you would
-do `sudo pip3 install miniirc_discord`. pip's version numbers have the same
-`MAJOR` and `MINOR` as miniirc, however `PATCH` may vary.
+do `sudo pip3 install miniirc_discord`. Version numbers should follow SemVer
+since 0.4.0 and are no longer in sync with `miniirc` until `miniirc_discord`
+becomes more stable.
 
 ### Manual installation
 

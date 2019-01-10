@@ -90,14 +90,17 @@ class Discord(miniirc.IRC):
             if len(args) == 4:
                 EMBED_NOTICE = discord.Embed(title=args[0], description=args[1], colour=arg[2])
                 EMBED_NOTICE.set_author(name=args[3], icon_url=discord.client.user.default_avatar_url)
+                self._run(self._client.send_messge(chan, EMBED_NOTICE))
             else:
                 self.debug('Invalid call to EMBED_NOTICE')
         elif cmd in ('NAMES',):
-            discord.Member._dict_
-    
+            self._run(self._client.send_messge(chan, discord.Server.members))
+
     def embed(self, title, description, colour, name, *icon_url):
         self.quote('EMBED_NOTICE', title, description, colour, name, icon_url)
-        
+
+
+
     def _main(self):
         self.debug('Main loop running!')
 

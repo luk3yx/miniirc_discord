@@ -17,7 +17,7 @@ channels = {}
 def _hostmask(author):
     return (
         author.mention,
-        '@{}#{}'.format(author.name, author.discriminator),
+        '{}#{}'.format(author.name, author.discriminator),
         'discord/{}/<@{}>'.format('bot' if author.bot else 'user', author.id)
     )
 

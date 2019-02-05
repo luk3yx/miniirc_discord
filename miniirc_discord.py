@@ -9,15 +9,15 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,5,0)
-version  = '0.5.0'
+ver      = (0,5,1)
+version  = '0.5.1'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
 def _hostmask(author):
     return (
         author.mention,
-        author.name,
+        '@{}#{}'.format(author.name, author.discriminator),
         'discord/{}/<@{}>'.format('bot' if author.bot else 'user', author.id)
     )
 

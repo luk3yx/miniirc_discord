@@ -141,6 +141,7 @@ def _on_away(self, client, run, tags, cmd, args):
             status = discord.Status(tags['+discordapp.com/status'])
         except:
             print('WARNING: Invalid status sent to AWAY!')
+            return
     else:
         status = discord.Status('online')
 

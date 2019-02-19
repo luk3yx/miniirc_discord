@@ -9,8 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,5,2)
-version  = '0.5.2'
+ver      = (0,5,3)
+version  = '0.5.3'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -135,7 +135,16 @@ def _on_away(self, client, run, tags, cmd, args):
         ptype = 0
     game = discord.Game(name = game, type = ptype, url = url)
     self.debug('Changing online presence:', game)
-    run(client.change_presence(game = game, idle = bool(tags.get('+idle'))))
+
+    if tags.get('+discordapp.com/status'):
+        try:
+            status = discord.Status(tags['+discordapp.com/status'])
+        except:
+            print('WARNING: Invalid status sent to AWAY!')
+    else:
+        status = discord.Status('online')
+
+    run(client.change_presence(game = game, status = status))
 
 # The discord class
 class Discord(miniirc.IRC):

@@ -54,7 +54,8 @@ are currently supported, and using leading zeroes (`03` or `05`) will break.
 Similar to `bitlbee-discord`, `AWAY` will set the bot's "Playing" text. If you
 want to change the prefix to something else, you can set the IRCv3 client tag
 `+discordapp.com/type` to (`Playing`, `Streaming`, `Listening to` or
-`Watching`). If the tag `+idle` exists, you will also be marked as idle.
+`Watching`). The `+discordapp.com/status` tag can be set to `'online'`,
+`'idle'`, `'dnd'` or `'invisible'`.
 
 ## Installation and setting up
 

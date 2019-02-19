@@ -9,8 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,5,1)
-version  = '0.5.1'
+ver      = (0,5,2)
+version  = '0.5.2'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -135,7 +135,7 @@ def _on_away(self, client, run, tags, cmd, args):
         ptype = 0
     game = discord.Game(name = game, type = ptype, url = url)
     self.debug('Changing online presence:', game)
-    run(client.change_presence(game = game))
+    run(client.change_presence(game = game, idle = bool(tags.get('+idle'))))
 
 # The discord class
 class Discord(miniirc.IRC):

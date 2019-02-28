@@ -9,8 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,5,5)
-version  = '0.5.5'
+ver      = (0,5,6)
+version  = '0.5.6'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -66,10 +66,8 @@ def _irc_to_discord(msg):
             word = word.split('`')
             code -= 1
             w = 0
-            print(word)
             for i in word:
                 code = (code + 1) % 2
-                print('', code)
                 if code:
                     word[w] = _escape_re.sub(r'\\\1', i)
                 w += 1

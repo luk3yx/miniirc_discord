@@ -9,8 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,5,3)
-version  = '0.5.3'
+ver      = (0,5,4)
+version  = '0.5.4'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -52,9 +52,32 @@ formats = {
     '\x02': '**',
 }
 _strip_colours = re.compile('\x03[0-9]?[0-9]?')
+_escape_re     = re.compile(r'([_\*\\])')
+_url_re        = re.compile(r'^https?\:\/\/')
 def _irc_to_discord(msg):
     msg = _strip_colours.sub('', msg)
-    msg = msg.replace('\\', '\\\\').replace('_', '\\_').replace('*', '\\*')
+
+    # TODO: A nicer more compact way of escaping values
+    msg  = msg.split(' ')
+    c    = 0
+    code = 1
+    for word in msg:
+        if not _url_re.match(word):
+            word = word.split('`')
+            code -= 1
+            w = 0
+            print(word)
+            for i in word:
+                code = (code + 1) % 2
+                print('', code)
+                if code:
+                    word[w] = _escape_re.sub(r'\\\1', i)
+                w += 1
+            msg[c] = '`'.join(word)
+        c += 1
+
+    msg = ' '.join(msg)
+
     for format in formats:
         msg = msg.replace(format + format, '').replace(format, formats[format])
     return msg

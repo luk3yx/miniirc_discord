@@ -9,8 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,5,6)
-version  = '0.5.6'
+ver      = (0,5,7)
+version  = '0.5.7'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -194,12 +194,18 @@ class Discord(miniirc.IRC):
     def _main(self):
         self.debug('Main loop running!')
 
-        self._client.run(self.ip)
+        try:
+            self._client.run(self.ip)
+        except:
+            pass
         self.connected = False
         self.debug('Disconnected!')
 
         if self.persist:
             self.debug('Reconnecting in 5 seconds...')
+            time.sleep(5)
+            self._main_lock = None
+            self.connect()
 
     def connect(self):
         if self.connected:

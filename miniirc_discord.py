@@ -9,8 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,5,7)
-version  = '0.5.7'
+ver      = (0,5,8)
+version  = '0.5.8'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -171,6 +171,7 @@ def _on_away(self, client, run, tags, cmd, args):
 # The discord class
 class Discord(miniirc.IRC):
     _client = None
+    msglen  = 2000
 
     def _run(self, coroutine):
         return asyncio.run_coroutine_threadsafe(coroutine, self._client.loop)

@@ -9,8 +9,8 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,5,8)
-version  = '0.5.8'
+ver      = (0,5,9)
+version  = '0.5.9'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -91,9 +91,12 @@ def _register_cmd(*cmds):
     return x
 
 # PRIVMSG
+_number_re = re.compile('[^0-9]')
 @_register_cmd('PRIVMSG')
 def _on_privmsg(self, client, run, tags, cmd, args):
-    if len(args) == 2 and args[0] in channels:
+    if len(args) == 2:
+        if args[0] not in channels:
+            channels[args[0]] = client.get_channel(_number_re.sub('', args[0]))
         chan = channels[args[0]]
         msg  = args[-1][1:]
         if msg[:7].upper() == '\x01ACTION':

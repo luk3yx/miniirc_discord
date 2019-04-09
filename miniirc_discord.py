@@ -9,10 +9,12 @@
 
 import asyncio, discord, miniirc, re, time
 
-ver      = (0,5,10)
-version  = '0.5.10'
+ver      = (0,5,11)
+version  = '0.5.11'
 __all__  = ['Discord', 'miniirc']
 channels = {}
+
+assert hasattr(discord, 'abc'), 'Please update discord.py!'
 
 def _hostmask(author):
     return (
@@ -31,25 +33,15 @@ def _handle_privmsg(irc, message):
     hostmask = _hostmask(message.author)
 
     # Create the tags
-    if hasattr(message, 'created_at'):
-        ts = message.created_at
-    else:
-        ts = message.timestamp
-
     tags = {
         'draft/msgid':  str(message.id),
-        'server-time':  ts.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'server-time':  message.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
     }
 
     # Create the args
     channel = str(message.channel.id)
 
-    if hasattr(discord, 'abc'):
-        is_pv = isinstance(message.channel, discord.abc.PrivateChannel)
-    else:
-        is_pv = message.is_private
-
-    if not is_pv:
+    if not isinstance(message.channel, discord.abc.PrivateChannel):
         channel = '#' + channel
     channels[channel] = message.channel
     args = [channel, ':' + message.content]
@@ -120,10 +112,7 @@ def _on_privmsg(self, client, run, tags, cmd, args):
         msg = _irc_to_discord(msg)
         self.debug('Translated PRIVMSG:', msg)
 
-        if hasattr(chan, 'send'):
-            run(chan.send(msg))
-        else:
-            run(client.send_message(chan, msg))
+        run(chan.send(msg))
     else:
         self.debug('Invalid call to PRIVMSG.')
 
@@ -161,10 +150,7 @@ def _on_notice(self, client, run, tags, cmd, args):
     embed = discord.Embed(title = title or None, description = msg,
         colour = colour or discord.Embed.Empty)
 
-    if hasattr(chan, 'send'):
-        run(chan.send(embed = embed))
-    else:
-        run(client.send_message(chan, embed = embed))
+    run(chan.send(embed = embed))
 
 # AWAY
 @_register_cmd('AWAY')
@@ -184,11 +170,8 @@ def _on_away(self, client, run, tags, cmd, args):
     else:
         ptype = 0
 
-    if hasattr(discord, 'Activity'):
-        game = discord.Activity(name = game,
-            type = discord.ActivityType(ptype), url = url)
-    else:
-        game = discord.Game(name = game, type = ptype, url = url)
+    game = discord.Activity(name = game, type = discord.ActivityType(ptype),
+        url = url)
     self.debug('Changing online presence:', game)
 
     if tags.get('+discordapp.com/status'):
@@ -200,10 +183,7 @@ def _on_away(self, client, run, tags, cmd, args):
     else:
         status = discord.Status('online')
 
-    if hasattr(discord, 'Activity'):
-        run(client.change_presence(activity = game, status = status))
-    else:
-        run(client.change_presence(game = game, status = status))
+    run(client.change_presence(activity = game, status = status))
 
 # The discord class
 class Discord(miniirc.IRC):
@@ -260,9 +240,8 @@ class Discord(miniirc.IRC):
         else:
             self._client = discord.Client()
         @self._client.event
-        @asyncio.coroutine
-        def on_message(message):
-            yield from _handle_privmsg(self, message)
+        async def on_message(message):
+            await _handle_privmsg(self, message)
 
         self.main()
 
@@ -273,9 +252,7 @@ class Discord(miniirc.IRC):
         if not self._client:
             return 0
 
-        if hasattr(self._client, 'guilds'):
-            return len(self._client.guilds)
-        return len(self._client.servers)
+        return len(self._client.guilds)
 
 # Add get_server_count equivalent to IRC.
 miniirc.IRC.get_server_count = lambda irc : 1 if irc.connected else 0

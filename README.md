@@ -19,8 +19,7 @@ differences:
     need to be the expected type (`port` should be `0` or `65536`).
 
 Channels will start in `#` if they are public and are currently just a channel
-ID. Before you can send messages into a channel, however, someone needs to send
-a message in one of them.
+ID.
 
 Some formatting from IRC to Discord should be translated nicely, however
 more complex codes and formatting from Discord to IRC are currently not.

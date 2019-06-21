@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 #
 # miniirc_discord: Allows miniirc bots/clients to connect to Discord.
-# Attempts to use IRCv3 tags to allow reactions etc to be sent.
 #
 # Licensed under the MIT License:
 # https://gitlab.com/luk3yx/miniirc_discord/LICENSE.md
@@ -23,8 +22,7 @@ def _hostmask(author):
         'discord/{}/<@{}>'.format('bot' if author.bot else 'user', author.id)
     )
 
-@asyncio.coroutine
-def _handle_privmsg(irc, message):
+async def _handle_privmsg(irc, message):
     if irc._client.user == message.author:
         return
 
@@ -102,17 +100,19 @@ def _get_channel(client, name):
 # PRIVMSG
 _number_re = re.compile('[^0-9]')
 @_register_cmd('PRIVMSG')
-def _on_privmsg(self, client, run, tags, cmd, args):
+async def _on_privmsg(self, client, tags, cmd, args):
     if len(args) == 2:
         chan = _get_channel(client, args[0])
         if not chan: return
-        msg  = args[-1][1:]
+        msg = args[-1]
+        if msg.startswith(':'):
+            msg = msg[1:]
         if msg[:7].upper() == '\x01ACTION':
             msg = '\x1d' + msg[8:].replace('\x01', '') + '\x1d'
         msg = _irc_to_discord(msg)
         self.debug('Translated PRIVMSG:', msg)
 
-        run(chan.send(msg))
+        await chan.send(msg)
     else:
         self.debug('Invalid call to PRIVMSG.')
 
@@ -133,13 +133,15 @@ _colours = [
 
 # NOTICE
 @_register_cmd('NOTICE')
-def _on_notice(self, client, run, tags, cmd, args):
+async def _on_notice(self, client, tags, cmd, args):
     if len(args) != 2:
         return self.debug('Invalid call to NOTICE.')
     chan = _get_channel(client, args[0])
     if not chan: return
     title = tags.get('+discordapp.com/embed-title') or ''
-    msg = args[1][1:]
+    msg = args[-1]
+    if msg.startswith(':'):
+        msg = msg[1:]
     colour = None
     if msg.startswith('\x03') and len(msg) > 2:
         try:
@@ -150,11 +152,11 @@ def _on_notice(self, client, run, tags, cmd, args):
     embed = discord.Embed(title = title or None, description = msg,
         colour = colour or discord.Embed.Empty)
 
-    run(chan.send(embed = embed))
+    await chan.send(embed = embed)
 
 # AWAY
 @_register_cmd('AWAY')
-def _on_away(self, client, run, tags, cmd, args):
+async def _on_away(self, client, tags, cmd, args):
     game = ' '.join(args)
     if game.startswith(':'):
         game = game[1:]
@@ -183,7 +185,7 @@ def _on_away(self, client, run, tags, cmd, args):
     else:
         status = discord.Status('online')
 
-    run(client.change_presence(activity = game, status = status))
+    await client.change_presence(activity = game, status = status)
 
 # The discord class
 class Discord(miniirc.IRC):
@@ -205,7 +207,7 @@ class Discord(miniirc.IRC):
             tags = {}
 
         if _outgoing_cmds.get(cmd):
-            _outgoing_cmds[cmd](self, self._client, self._run, tags, cmd, args)
+            self._run(_outgoing_cmds[cmd](self, self._client, tags, cmd, args))
         else:
             self.debug('Unknown command run:', cmd)
 

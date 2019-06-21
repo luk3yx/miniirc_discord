@@ -16,6 +16,7 @@ setup(
     long_description              = desc,
     long_description_content_type = 'text/markdown',
     install_requires              = ['discord.py>=1.0.0,<2', 'miniirc'],
+    python_requires               = '>=3.5',
 
     classifiers = [
         'Intended Audience :: Developers',

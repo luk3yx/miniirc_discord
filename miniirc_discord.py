@@ -6,10 +6,10 @@
 # https://gitlab.com/luk3yx/miniirc_discord/LICENSE.md
 #
 
-import asyncio, discord, miniirc, re, time
+import asyncio, discord, miniirc, re, time, traceback
 
-ver      = (0,5,11)
-version  = '0.5.11'
+ver      = (0,5,12)
+version  = '0.5.12'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -92,13 +92,13 @@ def _register_cmd(*cmds):
     return x
 
 # Get a channel
+_number_re = re.compile('[^0-9]')
 def _get_channel(client, name):
     if name not in channels:
-        channels[name] = client.get_channel(_number_re.sub('', name))
+        channels[name] = client.get_channel(int(_number_re.sub('', name)))
     return channels[name]
 
 # PRIVMSG
-_number_re = re.compile('[^0-9]')
 @_register_cmd('PRIVMSG')
 async def _on_privmsg(self, client, tags, cmd, args):
     if len(args) == 2:
@@ -190,12 +190,13 @@ async def _on_away(self, client, tags, cmd, args):
 # The discord class
 class Discord(miniirc.IRC):
     _client = None
+    _sendq  = None
     msglen  = 2000
 
     def _run(self, coroutine):
         return asyncio.run_coroutine_threadsafe(coroutine, self._client.loop)
 
-    def quote(self, *msg, force = None, tags = None):
+    def quote(self, *msg, force=None, tags=None):
         # Parse the message using miniirc's built-in parser to reduce redundancy
         msg = ' '.join(msg)
         self.debug('>>>', msg)
@@ -205,6 +206,9 @@ class Discord(miniirc.IRC):
 
         if not isinstance(tags, dict):
             tags = {}
+
+        if not self.connected:
+            self._sendq.append((tags, *msg))
 
         if _outgoing_cmds.get(cmd):
             self._run(_outgoing_cmds[cmd](self, self._client, tags, cmd, args))
@@ -218,10 +222,10 @@ class Discord(miniirc.IRC):
         try:
             self._client.loop.run_until_complete(self._client.start(self.ip))
         except:
-            raise
-            pass
-        print('Finished')
-        self.connected = False
+            traceback.print_exc()
+
+        self.connected = None
+        del self._client
         self.debug('Disconnected!')
 
         if self.persist:
@@ -231,19 +235,24 @@ class Discord(miniirc.IRC):
             self.connect()
 
     def connect(self):
-        if self.connected:
+        if self.connected != None:
             self.debug('Already connected!')
             return
-        self.connected = True
+        self.connected = False
         self.debug('Connecting...')
 
-        if self._client:
-            asyncio.set_event_loop(self._client.loop)
-        else:
-            self._client = discord.Client()
+        loop = asyncio.new_event_loop()
+        self._client = discord.Client(loop=loop, max_messages=0)
+
         @self._client.event
         async def on_message(message):
             await _handle_privmsg(self, message)
+
+        @self._client.event
+        async def on_ready():
+            self.nick = self._client.user.mention
+            self._handle('001', ('', '', ''), {}, [self.nick,
+                ':Welcome to Discord ' + self.nick])
 
         self.main()
 
@@ -256,5 +265,26 @@ class Discord(miniirc.IRC):
 
         return len(self._client.guilds)
 
+    def __init__(self, token=None, port=-1, nick='', channels=None, *,
+            ping_interval=60, ns_identity=None, **kwargs):
+        if token is None:
+            try:
+                token = kwargs.pop('ip')
+            except KeyError:
+                raise TypeError("Discord.__init__() missing 1 required "
+                    "positional argument: 'token'") from None
+
+        super().__init__(token, port, nick, ping_interval=0, **kwargs)
+
 # Add get_server_count equivalent to IRC.
 miniirc.IRC.get_server_count = lambda irc : 1 if irc.connected else 0
+
+# Compatibility
+if hasattr(miniirc.IRC, 'sendq'):
+    p = property(lambda self : self.sendq)
+    @p.setter
+    def p(self, value):
+        self.sendq = value
+    Discord._sendq = p
+
+    del p

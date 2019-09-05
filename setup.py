@@ -7,10 +7,10 @@ with open('README.md', 'r') as f:
 
 setup(
     name        = 'miniirc_discord',
-    version     = '0.5.11',
+    version     = '0.5.12',
     py_modules  = ['miniirc_discord'],
     author      = 'luk3yx',
-    description = 'A Discord wrapper for miniiric.',
+    description = 'A Discord wrapper for miniirc.',
     license     = 'MIT',
 
     long_description              = desc,

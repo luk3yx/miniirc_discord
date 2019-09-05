@@ -8,8 +8,8 @@
 
 import asyncio, discord, miniirc, re, time, traceback
 
-ver      = (0,5,12)
-version  = '0.5.12'
+ver      = (0,5,13)
+version  = '0.5.13'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -208,6 +208,8 @@ class Discord(miniirc.IRC):
             tags = {}
 
         if not self.connected:
+            if self._sendq is None:
+                self._sendq = []
             self._sendq.append((tags, *msg))
 
         if _outgoing_cmds.get(cmd):

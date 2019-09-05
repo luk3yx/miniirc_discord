@@ -8,8 +8,8 @@
 
 import asyncio, discord, miniirc, re, time, traceback
 
-ver      = (0,5,13)
-version  = '0.5.13'
+ver      = (0,5,14)
+version  = '0.5.14'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -94,9 +94,10 @@ def _register_cmd(*cmds):
 # Get a channel
 _number_re = re.compile('[^0-9]')
 def _get_channel(client, name):
-    if name not in channels:
-        channels[name] = client.get_channel(int(_number_re.sub('', name)))
-    return channels[name]
+    if name in channels:
+        return channels[name]
+    else:
+        return client.get_channel(int(_number_re.sub('', name)))
 
 # PRIVMSG
 @_register_cmd('PRIVMSG')
@@ -197,20 +198,25 @@ class Discord(miniirc.IRC):
         return asyncio.run_coroutine_threadsafe(coroutine, self._client.loop)
 
     def quote(self, *msg, force=None, tags=None):
+        if not isinstance(tags, dict):
+            if msg and isinstance(msg[0], dict):
+                tags, *msg = msg
+            else:
+                tags = {}
+
+        if not self.connected:
+            if self._sendq is None:
+                self._sendq = []
+            self.debug('>Q>', msg)
+            self._sendq.append((tags, *msg))
+            return
+
         # Parse the message using miniirc's built-in parser to reduce redundancy
         msg = ' '.join(msg)
         self.debug('>>>', msg)
         cmd, hostmask, _, args = miniirc.ircv3_message_parser(msg)
         cmd = cmd.upper()
         del _
-
-        if not isinstance(tags, dict):
-            tags = {}
-
-        if not self.connected:
-            if self._sendq is None:
-                self._sendq = []
-            self._sendq.append((tags, *msg))
 
         if _outgoing_cmds.get(cmd):
             self._run(_outgoing_cmds[cmd](self, self._client, tags, cmd, args))
@@ -253,7 +259,7 @@ class Discord(miniirc.IRC):
         @self._client.event
         async def on_ready():
             self.nick = self._client.user.mention
-            self._handle('001', ('', '', ''), {}, [self.nick,
+            self._handle('001', ('001', '001', '001'), {}, [self.nick,
                 ':Welcome to Discord ' + self.nick])
 
         self.main()

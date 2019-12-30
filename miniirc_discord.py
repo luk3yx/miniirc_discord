@@ -8,8 +8,8 @@
 
 import asyncio, discord, miniirc, re, time, traceback
 
-ver      = (0,5,14)
-version  = '0.5.14'
+ver      = (0,5,15)
+version  = '0.5.15'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -51,8 +51,10 @@ formats = {
     '\x1f': '__',
     '\x1d': '*',
     '\x02': '**',
+    '\x1e': '~~',
+    '\x11': '`',
 }
-_strip_colours = re.compile('\x03[0-9]?[0-9]?')
+_strip_colours = re.compile('\x03([0-9]{1,2})?(,[0-9]{1,2})?')
 _escape_re     = re.compile(r'([_\*\\])')
 _url_re        = re.compile(r'^\<?https?\:\/\/')
 def _irc_to_discord(msg):

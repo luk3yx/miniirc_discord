@@ -8,8 +8,8 @@
 
 import asyncio, discord, miniirc, re, time, traceback
 
-ver      = (0,5,15)
-version  = '0.5.15'
+ver      = (0,5,16)
+version  = '0.5.16'
 __all__  = ['Discord', 'miniirc']
 channels = {}
 
@@ -252,7 +252,7 @@ class Discord(miniirc.IRC):
         self.debug('Connecting...')
 
         loop = asyncio.new_event_loop()
-        self._client = discord.Client(loop=loop, max_messages=0)
+        self._client = discord.Client(loop=loop, max_messages=None)
 
         @self._client.event
         async def on_message(message):

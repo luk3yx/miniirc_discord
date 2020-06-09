@@ -6,12 +6,11 @@
 # https://gitlab.com/luk3yx/miniirc_discord/LICENSE.md
 #
 
-import asyncio, discord, miniirc, re, time, traceback
+import asyncio, discord, miniirc, re, threading, time, traceback
 
-ver      = (0,5,16)
-version  = '0.5.16'
+ver      = (0,5,17)
+version  = '0.5.17'
 __all__  = ['Discord', 'miniirc']
-channels = {}
 
 assert hasattr(discord, 'abc'), 'Please update discord.py!'
 
@@ -41,7 +40,6 @@ async def _handle_privmsg(irc, message):
 
     if not isinstance(message.channel, discord.abc.PrivateChannel):
         channel = '#' + channel
-    channels[channel] = message.channel
     args = [channel, ':' + message.content]
 
     irc.debug('Handling message:', hostmask, tags, args)
@@ -96,10 +94,7 @@ def _register_cmd(*cmds):
 # Get a channel
 _number_re = re.compile('[^0-9]')
 def _get_channel(client, name):
-    if name in channels:
-        return channels[name]
-    else:
-        return client.get_channel(int(_number_re.sub('', name)))
+    return client.get_channel(int(_number_re.sub('', name)))
 
 # PRIVMSG
 @_register_cmd('PRIVMSG')
@@ -290,11 +285,12 @@ class Discord(miniirc.IRC):
 miniirc.IRC.get_server_count = lambda irc : 1 if irc.connected else 0
 
 # Compatibility
-if hasattr(miniirc.IRC, 'sendq'):
+if miniirc.ver >= (2,0,0):
+    Discord.main = lambda self : threading.Thread(target=self._main).start()
+
     p = property(lambda self : self.sendq)
     @p.setter
     def p(self, value):
         self.sendq = value
     Discord._sendq = p
-
     del p

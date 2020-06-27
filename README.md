@@ -14,15 +14,24 @@ To use miniirc_discord, you already need to know how to use miniirc ([GitHub],
 use `miniirc_discord.Discord`. This is very similar, however has some
 differences:
 
- - `ip` is now your Discord token (see [this guide] to get one).
+ - `ip` is now your Discord token (see [this guide] to get one). You should
+    use this as a positional argument (`miniirc_discord.Discord('TOKEN')`).
  - `port`, `nick`, `ident` and `realname` are currently ignored, however still
     need to be the expected type (`port` should be `0` or `65536`).
+ - There is a [`stateless_mode` keyword argument](#stateless-mode).
+ - The `discord_client` attribute returns an instance of `discord.Client`, or
+    `None` if stateless_mode is enabled.
 
 Channels will start in `#` if they are public and are currently just a channel
 ID.
 
 Some formatting from IRC to Discord should be translated nicely, however
 more complex codes and formatting from Discord to IRC are currently not.
+
+### Stateless mode
+
+Stateless mode will instruct discord.py to disable the user cache. This should
+be used if you are not using `discord_client` to cut back on RAM usage.
 
 ## Supported commands
 

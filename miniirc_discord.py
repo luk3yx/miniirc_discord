@@ -8,8 +8,8 @@
 
 import asyncio, discord, miniirc, re, threading, time, traceback
 
-ver      = (0,5,17)
-version  = '0.5.17'
+ver      = (0,5,18)
+version  = '0.5.18'
 __all__  = ['Discord', 'miniirc']
 
 assert hasattr(discord, 'abc'), 'Please update discord.py!'
@@ -183,13 +183,19 @@ async def _on_away(self, client, tags, cmd, args):
     else:
         status = discord.Status('online')
 
-    await client.change_presence(activity = game, status = status)
+    await client.change_presence(activity=game, status=status)
 
 # The discord class
 class Discord(miniirc.IRC):
     _client = None
     _sendq  = None
     msglen  = 2000
+
+    @property
+    def discord_client(self):
+        if self.stateless_mode:
+            return None
+        return self._client
 
     def _run(self, coroutine):
         return asyncio.run_coroutine_threadsafe(coroutine, self._client.loop)
@@ -247,7 +253,16 @@ class Discord(miniirc.IRC):
         self.debug('Connecting...')
 
         loop = asyncio.new_event_loop()
-        self._client = discord.Client(loop=loop, max_messages=None)
+        options = {}
+        if self.stateless_mode:
+            self._client = discord.Client(
+                loop=loop,
+                max_messages=None,
+                fetch_offline_members=False,
+                guild_subscriptions=False,
+            )
+        else:
+            self._client = discord.Client(loop=loop, max_messages=None)
 
         @self._client.event
         async def on_message(message):
@@ -271,7 +286,8 @@ class Discord(miniirc.IRC):
         return len(self._client.guilds)
 
     def __init__(self, token=None, port=-1, nick='', channels=None, *,
-            ping_interval=60, ns_identity=None, **kwargs):
+            ping_interval=60, ns_identity=None, stateless_mode=False,
+            **kwargs):
         if token is None:
             try:
                 token = kwargs.pop('ip')
@@ -279,6 +295,7 @@ class Discord(miniirc.IRC):
                 raise TypeError("Discord.__init__() missing 1 required "
                     "positional argument: 'token'") from None
 
+        self.stateless_mode = stateless_mode
         super().__init__(token, port, nick, ping_interval=0, **kwargs)
 
 # Add get_server_count equivalent to IRC.

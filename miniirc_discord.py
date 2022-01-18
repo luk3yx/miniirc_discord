@@ -30,8 +30,10 @@ async def _handle_privmsg(irc, message):
     hostmask = _hostmask(message.author)
 
     # Create the tags
+    msgid = str(message.id)
     tags = {
-        'draft/msgid':  str(message.id),
+        'draft/msgid': msgid,
+        'msgid': msgid,
         'server-time':  message.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
     }
 
@@ -274,7 +276,7 @@ class Discord(miniirc.IRC):
             self._handle('001', ('001', '001', '001'), {}, [self.nick,
                 ':Welcome to Discord ' + self.nick])
 
-        self.main()
+        self._start_main_loop()
 
     def disconnect(self):
         raise NotImplementedError

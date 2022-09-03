@@ -27,6 +27,9 @@ ID.
 Some formatting from IRC to Discord should be translated nicely, however
 more complex codes and formatting from Discord to IRC are currently not.
 
+Your bot will need to be able to request the "message content" intent for
+miniirc_discord to work properly.
+
 ### Stateless mode
 
 The `stateless_mode` keyword argument will instruct discord.py to disable the
@@ -120,7 +123,8 @@ since 0.4.0 and are no longer in sync with `miniirc`.
 
 ## Getting a bot token
 
-To get a Discord bot token and invite link, see [this guide].
+To get a Discord bot token and invite link, see [this guide]. Make sure you
+enable the message content intent in the bot settings page.
 
 [GitHub]:       https://github.com/luk3yx/miniirc
 [GitLab]:       https://gitlab.com/luk3yx/miniirc

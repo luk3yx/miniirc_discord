@@ -7,7 +7,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name        = 'miniirc_discord',
-    version     = '0.5.18',
+    version     = '0.6.0',
     py_modules  = ['miniirc_discord'],
     author      = 'luk3yx',
     description = 'A Discord wrapper for miniirc.',
@@ -15,8 +15,8 @@ setup(
 
     long_description              = desc,
     long_description_content_type = 'text/markdown',
-    install_requires              = ['discord.py>=1.0.0,<2', 'miniirc'],
-    python_requires               = '>=3.5',
+    install_requires              = ['discord.py>=2.0.0,<3', 'miniirc>=1.8.0,<2'],
+    python_requires               = '>=3.8',
 
     classifiers = [
         'Intended Audience :: Developers',

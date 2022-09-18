@@ -2,6 +2,12 @@
 
 Format partially copied from [Keep a Changelog](https://keepachangelog.com).
 
+## 0.6.1 - 2022-09-18
+
+### Changed
+
+ - Markdown should now be escaped better when using code blocks.
+
 ## 0.6.0 - 2022-09-03
 
 ### Added

@@ -8,8 +8,8 @@
 
 import asyncio, discord, itertools, miniirc, re, threading, time, traceback
 
-ver      = (0,6,0)
-version  = '0.6.0'
+ver      = (0,6,1)
+version  = '0.6.1'
 __all__  = ['Discord', 'miniirc']
 
 assert miniirc.ver >= (1, 8, 0), 'Please update miniirc!'
@@ -81,12 +81,12 @@ async def _handle_reaction(irc, payload):
 
 
 _formatting_re = re.compile(
-    r'\x02|\x1d|\x1f|\x1e|\x11|\x16|\x0f'
+    r'\x02|\x1d|\x1f|\x1e|\x11|`|\x16|\x0f'
     r'|\x03([0-9]{1,2})?(?:,([0-9]{1,2}))?'
     r'|\x04([0-9a-fA-F]{6})?(?:,([0-9a-fA-F]{6}))?'
 )
 _md_chars = {'\x02': '**', '\x1d': '_', '\x1f': '__', '\x1e': '~~',
-             '\x11': '`'}
+             '\x11': '`', '`': '`'}
 
 
 class _TagManager:
@@ -115,6 +115,8 @@ class _TagManager:
     def write(self, s):
         if s:
             self.write_tags()
+            if '`' not in self.tags:
+                s = discord.utils.escape_markdown(s)
             self.text.append(s)
 
     def toggle(self, tag):
@@ -129,8 +131,6 @@ class _TagManager:
 
 def _irc_to_discord(msg):
     """ Converts IRC formatting codes to Discord markdown. """
-    msg = discord.utils.escape_markdown(msg).replace('\\`', '`')
-
     tags = _TagManager()
     prev_end = start = 0
     for match in _formatting_re.finditer(msg):
@@ -139,6 +139,8 @@ def _irc_to_discord(msg):
         char = msg[start]
         if char in _md_chars:
             tags.toggle(_md_chars[char])
+            if char == '`':
+                tags.write_tags()
         elif char == '\x0f':
             tags.tags.clear()
         elif char == '\x03':

@@ -58,8 +58,7 @@ channel = irc.discord_client.get_channel(channel_id)  # No error
 ### `PRIVMSG`
 
 `PRIVMSG` operates like you'd expect and IRC formatting codes are converted to
-markdown. You cannot, however, send messages to a channel before the bot has
-received a message from the channel.
+markdown. You can use the `+draft/reply` IRCv3 tag to reply to a message.
 
 ### `CTCP ACTION` (`irc.me()`)
 

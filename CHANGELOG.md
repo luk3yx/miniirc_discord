@@ -2,6 +2,12 @@
 
 Format partially copied from [Keep a Changelog](https://keepachangelog.com).
 
+## 0.6.2 - 2023-06-23
+
+### Changed
+
+ - Attachment URLs are now included in incoming messages.
+
 ## 0.6.1 - 2022-09-18
 
 ### Changed

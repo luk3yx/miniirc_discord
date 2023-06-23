@@ -8,8 +8,8 @@
 
 import asyncio, discord, itertools, miniirc, re, threading, time, traceback
 
-ver      = (0,6,1)
-version  = '0.6.1'
+ver      = (0,6,2)
+version  = '0.6.2'
 __all__  = ['Discord', 'miniirc']
 
 assert miniirc.ver >= (1, 8, 0), 'Please update miniirc!'
@@ -58,7 +58,13 @@ async def _handle_privmsg(irc, message):
 
     if not isinstance(message.channel, discord.abc.PrivateChannel):
         channel = '#' + channel
-    args = [channel, _v1_only_colon + message.content]
+
+    lines = []
+    if message.content:
+        lines.append(message.content)
+    lines.extend(attachment.url for attachment in message.attachments)
+
+    args = [channel, _v1_only_colon + '\n'.join(lines)]
 
     irc.debug('Handling message:', hostmask, tags, args)
     irc._handle('PRIVMSG', hostmask, tags, args)
